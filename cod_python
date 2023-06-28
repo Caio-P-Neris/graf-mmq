@@ -1,0 +1,50 @@
+#http://macbeth.if.usp.br/~gusev/MMQ.pdf
+#https://edisciplinas.usp.br/mod/resource/view.php?id=1557710
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+#Importa os dados de um arquivo ou digita um exemplo com 5 pontos
+#dados = np.array((pd.read_csv('dados_mmq.txt', delimiter = "\s", decimal = ",")))
+dados = np.array([[3.92,0.03,0.08],[4.08,0.07,0.08],[4.26,0.12,0.09],[4.4,0.16,0.1],[4.7,0.21,0.1],[4.9,0.28,0.1],[5.1,0.34,0.1],[5.4,0.4,0.1],[5.7,0.48,0.2]])
+x=dados[:,0]
+y=dados[:,1]
+inc_y=dados[:,2]
+
+S1=np.sum(1/inc_y**2)
+Sx=np.sum(x/inc_y**2)
+Sx2=np.sum(x**2/inc_y**2)
+Sxy=np.sum(x*y/inc_y**2)
+Sy=np.sum(y/inc_y**2)
+
+coef = np.zeros(2)
+inc_coef = np.zeros(2)
+coef[0]= (Sx2*Sy-Sx*Sxy) / (S1*Sx2-Sx**2)
+coef[1]= (S1*Sxy-Sx*Sy) / (S1*Sx2-Sx**2)
+inc_coef[0]=np.sqrt( Sx2 / (S1*Sx2-Sx**2) )
+inc_coef[1]=np.sqrt( S1/ (S1*Sx2-Sx**2) )
+
+x_ajuste = np.linspace(min(x),max(x),10)
+y_ajuste = coef[0]+coef[1]*x_ajuste
+
+print('dados originais: \n',dados)
+print('Reta ajustada: \n')
+print('y = %.3f  + %.2f * x' % (coef[0],coef[1]))
+print('incertezas: inc_a= %.3f e inc_b=  %.2f' % (inc_coef[0],inc_coef[1]))
+
+plt.rcParams.update({'font.size': 14})
+plt.figure()
+plt.errorbar(x,y,xerr=inc_y ,fmt='k.',ecolor='r',barsabove='true',label='dados experimentais')
+plt.plot(x_ajuste,y_ajuste,'b--',label='reta mmq')
+plt.xlabel('x');plt.ylabel('y');plt.grid();plt.legend()
+
+#EXTRA: retas superior e inferior
+y_ajuste_sup = (coef[0]-inc_coef[0])+(coef[1]+inc_coef[1])*x_ajuste
+y_ajuste_inf = (coef[0]+inc_coef[0])+(coef[1]-inc_coef[1])*x_ajuste
+
+#plt.figure()
+#plt.errorbar(x,y,inc_y,fmt='k.',ecolor='r',barsabove='true',label='dados experimentais')
+#plt.plot(x_ajuste,y_ajuste,'b--',label='reta média')
+#plt.plot(x_ajuste,y_ajuste_sup,'g:',label='reta superior')
+#plt.plot(x_ajuste,y_ajuste_inf,'y:',label='reta inferior')
+plt.xlabel('x');plt.ylabel('y');plt.grid();plt.legend()
